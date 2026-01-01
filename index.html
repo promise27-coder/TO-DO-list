@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevTask - Live Sync</title>
+    <title>DevTask - Secure Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
-        /* --- THEME: NORD (Same UI) --- */
+        /* --- THEME: NORD --- */
         :root { --bg-body: #2e3440; --bg-card: #3b4252; --bg-input: #434c5e; --text-main: #d8dee9; --text-muted: #94a3b8; --accent-primary: #88c0d0; --accent-secondary: #ebcb8b; --accent-danger: #bf616a; --accent-success: #a3be8c; --border-radius: 8px; --border-color: #4c566a; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; display: flex; justify-content: center; align-items: center; padding: 2rem; overflow: hidden; }
@@ -17,11 +17,10 @@
         .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 52, 64, 0.95); backdrop-filter: blur(10px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.3s ease; }
         .login-box { background: var(--bg-card); border: 1px solid var(--accent-primary); padding: 40px; width: 100%; max-width: 400px; border-radius: 12px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         .login-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; color: var(--accent-primary); }
-        .login-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 30px; }
+        .login-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
 
-        /* LAYOUT & MOBILE FIX */
+        /* LAYOUT */
         .app-container { display: grid; grid-template-columns: 320px 1fr; gap: 30px; width: 100%; max-width: 1100px; height: 85vh; opacity: 0; transition: opacity 0.5s ease; }
-        
         @media (max-width: 900px) {
             .app-container { grid-template-columns: 1fr; height: 100%; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 20px; }
             body { height: auto; overflow: auto; padding: 10px; }
@@ -31,8 +30,6 @@
 
         .dev-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .sidebar { display: flex; flex-direction: column; flex-shrink: 0; }
-        
-        /* USER & INPUTS */
         .user-section { margin-bottom: 35px; }
         .greeting-row { display: flex; align-items: baseline; gap: 6px; font-size: 1.2rem; flex-wrap: wrap; }
         .user-name { font-weight: 700; color: white; border-bottom: 1px dashed transparent; cursor: text; transition: 0.2s; min-width: 50px; }
@@ -54,7 +51,6 @@
         .add-btn { margin-top: 10px; width: 100%; padding: 14px; background: var(--accent-primary); color: #2e3440; font-weight: 700; border: none; border-radius: var(--border-radius); cursor: pointer; transition: 0.2s; }
         #scheduledInputs { display: none; }
 
-        /* LISTS */
         .main-content { display: flex; flex-direction: column; gap: 20px; height: 100%; overflow: hidden; min-height: 0; }
         .box-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 2px solid var(--bg-body); margin-bottom: 10px; flex-shrink: 0; }
         .box-title { font-weight: 600; display: flex; align-items: center; gap: 8px; }
@@ -83,12 +79,21 @@
 
     <div id="loginOverlay" class="login-overlay">
         <div class="login-box">
-            <div class="login-title">Identity Verification</div>
-            <div class="login-sub">Please enter your developer codename</div>
+            <div class="login-title">Secure Access</div>
+            <div class="login-sub">Enter your codename & password</div>
+            
             <div class="input-group">
-                <input type="text" id="loginNameInput" placeholder="> Enter name here..." autocomplete="off">
+                <input type="text" id="loginNameInput" placeholder="> Codename" autocomplete="off">
             </div>
-            <button class="add-btn" id="loginBtn">Access System</button>
+            
+            <div class="input-group">
+                <input type="password" id="loginPassInput" placeholder="> Password" autocomplete="off">
+            </div>
+
+            <button class="add-btn" id="loginBtn">Login / Register</button>
+            <div style="font-size:0.7rem; color:#94a3b8; margin-top:10px;">
+                (New user? Enter a password to register instantly)
+            </div>
         </div>
     </div>
 
@@ -97,8 +102,7 @@
             <div class="user-section">
                 <div class="greeting-row">
                     <span>Hello,</span>
-                    <span id="userName" class="user-name" contenteditable="true" spellcheck="false">Dev</span>
-                    <i class="ph-fill ph-pencil-simple edit-icon"></i>
+                    <span id="userName" class="user-name" contenteditable="false">Dev</span>
                 </div>
                 <div class="welcome-sub">welcome back.</div>
             </div>
@@ -151,12 +155,10 @@
     </div>
 
     <script type="module">
-        // Import Firebase Functions from CDN (Compatible with HTML file)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, remove, update } 
+        import { getDatabase, ref, push, onValue, remove, update, get, set, child } 
         from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- YOUR FIREBASE CONFIGURATION ---
         const firebaseConfig = {
             apiKey: "AIzaSyDJiG6SkXmj_ofDuYiIRf8D5H6kyNvuhho",
             authDomain: "to-do-promise.firebaseapp.com",
@@ -165,31 +167,114 @@
             messagingSenderId: "1033945661048",
             appId: "1:1033945661048:web:859e70fe1788ccd989b78d",
             measurementId: "G-EPWPC7CQNW",
-            // IMPORTANT: I added this manually based on your Project ID
             databaseURL: "https://to-do-promise-default-rtdb.firebaseio.com"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const tasksRef = ref(db, 'tasks');
-
-        // State
+        
+        // Variables
+        let tasksRef;
         let tasks = [];
         let mode = 'quick';
-        const STORAGE_KEY_USER = 'devTask_user_final';
+        let currentUser = '';
+        const STORAGE_KEY_USER = 'devTask_user_secure'; // Changed key to force re-login for security
 
-        // --- Functions Logic ---
-        function toggleMode(newMode) {
-            mode = newMode;
-            document.getElementById('btnQuick').classList.toggle('active', mode === 'quick');
-            document.getElementById('btnSched').classList.toggle('active', mode === 'scheduled');
-            document.getElementById('scheduledInputs').style.display = mode === 'quick' ? 'none' : 'block';
-            document.getElementById('taskInput').placeholder = mode === 'quick' ? "> Quick note..." : "> Scheduled task...";
+        // --- 1. SETUP FIREBASE FOR SPECIFIC USER ---
+        function initFirebaseForUser(userName) {
+            currentUser = userName;
+            tasksRef = ref(db, 'tasks/' + userName);
+
+            onValue(tasksRef, (snapshot) => {
+                tasks = [];
+                const data = snapshot.val();
+                if(data) {
+                    Object.keys(data).forEach(key => {
+                        tasks.push({ id: key, ...data[key] });
+                    });
+                }
+                render();
+            });
         }
 
-        // Add to Firebase
+        // --- 2. SECURE LOGIN LOGIC ---
+        
+        async function submitLogin() {
+            const rawName = document.getElementById('loginNameInput').value.trim();
+            const password = document.getElementById('loginPassInput').value.trim();
+            const name = rawName.replace(/[^a-zA-Z0-9]/g, ""); 
+
+            if(!name || !password) {
+                return alert("Username and Password are required!");
+            }
+
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.innerText = "Checking...";
+
+            // Check if user exists in 'credentials' node
+            const dbRef = ref(db);
+            
+            try {
+                const snapshot = await get(child(dbRef, `credentials/${name}`));
+                
+                if (snapshot.exists()) {
+                    // USER EXISTS - CHECK PASSWORD
+                    const savedPass = snapshot.val();
+                    if (savedPass === password) {
+                        // Success Logic
+                        loginSuccess(name);
+                    } else {
+                        alert("❌ INCORRECT PASSWORD!");
+                        loginBtn.innerText = "Login / Register";
+                    }
+                } else {
+                    // USER DOES NOT EXIST - REGISTER NEW
+                    if(confirm(`User '${name}' not found. Create new account with this password?`)) {
+                        await set(ref(db, 'credentials/' + name), password);
+                        alert("✅ Account Created Successfully!");
+                        loginSuccess(name);
+                    } else {
+                        loginBtn.innerText = "Login / Register";
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error connecting to server.");
+                loginBtn.innerText = "Login / Register";
+            }
+        }
+
+        function loginSuccess(name) {
+            // Save to local storage for auto-login next time
+            localStorage.setItem(STORAGE_KEY_USER, name);
+            
+            document.getElementById('userName').innerText = name;
+            const overlay = document.getElementById('loginOverlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                document.getElementById('appContainer').style.opacity = '1';
+            }, 300);
+
+            initFirebaseForUser(name);
+        }
+
+        function checkAutoLogin() {
+            const savedUser = localStorage.getItem(STORAGE_KEY_USER);
+            if (savedUser) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('appContainer').style.opacity = '1';
+                document.getElementById('userName').innerText = savedUser;
+                initFirebaseForUser(savedUser);
+            } else {
+                document.getElementById('loginNameInput').focus();
+            }
+        }
+
+        // --- 3. TASK OPERATIONS ---
         function addTask() {
+            if(!currentUser) return;
+
             const text = document.getElementById('taskInput').value.trim();
             if(!text) return;
             
@@ -207,45 +292,35 @@
                 newTask.priority = document.getElementById('priorityInput').value;
             }
 
-            // Push to Cloud
             push(tasksRef, newTask);
             document.getElementById('taskInput').value = '';
         }
 
-        // Live Listener (Sync)
-        onValue(tasksRef, (snapshot) => {
-            tasks = [];
-            const data = snapshot.val();
-            if(data) {
-                // Convert Object to Array
-                Object.keys(data).forEach(key => {
-                    tasks.push({ id: key, ...data[key] });
-                });
-            }
-            render();
-        });
-
-        // Toggle in Firebase
         window.toggleTask = (id, currentStatus) => {
-            update(ref(db, `tasks/${id}`), { completed: !currentStatus });
+            update(ref(db, `tasks/${currentUser}/${id}`), { completed: !currentStatus });
         }
 
-        // Remove from Firebase
         window.removeTask = (id) => {
-            remove(ref(db, `tasks/${id}`));
+            remove(ref(db, `tasks/${currentUser}/${id}`));
         }
 
-        // Clear Group
         window.clearGroup = (type) => {
             if(confirm(`Delete all ${type} tasks?`)) {
-                // Find all tasks of this type and remove them
                 tasks.filter(t => t.type === type).forEach(t => {
-                    remove(ref(db, `tasks/${t.id}`));
+                    remove(ref(db, `tasks/${currentUser}/${t.id}`));
                 });
             }
         }
 
-        // --- RENDER (Same Logic) ---
+        // --- 4. RENDER & UI ---
+        function toggleMode(newMode) {
+            mode = newMode;
+            document.getElementById('btnQuick').classList.toggle('active', mode === 'quick');
+            document.getElementById('btnSched').classList.toggle('active', mode === 'scheduled');
+            document.getElementById('scheduledInputs').style.display = mode === 'quick' ? 'none' : 'block';
+            document.getElementById('taskInput').placeholder = mode === 'quick' ? "> Quick note..." : "> Scheduled task...";
+        }
+
         function render() {
             const qList = document.getElementById('quickList');
             const sList = document.getElementById('scheduledList');
@@ -286,40 +361,25 @@
             `;
         }
 
-        // --- Event Listeners (Module Scope) ---
+        // --- 5. EVENT LISTENERS ---
         document.getElementById('btnQuick').addEventListener('click', () => toggleMode('quick'));
         document.getElementById('btnSched').addEventListener('click', () => toggleMode('scheduled'));
         document.getElementById('commitBtn').addEventListener('click', addTask);
         document.getElementById('taskInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') addTask(); });
-        
         document.getElementById('clearQuick').addEventListener('click', () => clearGroup('quick'));
         document.getElementById('clearSched').addEventListener('click', () => clearGroup('scheduled'));
 
-        // Login Logic
         const loginBtn = document.getElementById('loginBtn');
         const loginInput = document.getElementById('loginNameInput');
-        
-        function submitLogin() {
-            const name = loginInput.value.trim();
-            if(name) {
-                localStorage.setItem(STORAGE_KEY_USER, name);
-                document.getElementById('userName').innerText = name;
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('appContainer').style.opacity = '1';
-            }
-        }
+        const passInput = document.getElementById('loginPassInput');
         
         loginBtn.addEventListener('click', submitLogin);
-        loginInput.addEventListener('keypress', (e) => { if(e.key==='Enter') submitLogin() });
+        passInput.addEventListener('keypress', (e) => { if(e.key==='Enter') submitLogin() });
 
-        // Init
-        const savedUser = localStorage.getItem(STORAGE_KEY_USER);
-        if(savedUser) {
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('appContainer').style.opacity = '1';
-            document.getElementById('userName').innerText = savedUser;
-        }
         document.getElementById('dateInput').valueAsDate = new Date();
+        
+        // Start Check
+        checkAutoLogin();
 
     </script>
 </body>
