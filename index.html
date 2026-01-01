@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevTask - Secure & Sync</title>
+    <title>DevTask - Advanced</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
@@ -13,13 +13,14 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; display: flex; justify-content: center; align-items: center; padding: 2rem; overflow: hidden; }
         
-        /* LOGIN OVERLAY */
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 52, 64, 0.95); backdrop-filter: blur(10px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.3s ease; }
-        .login-box { background: var(--bg-card); border: 1px solid var(--accent-primary); padding: 40px; width: 100%; max-width: 400px; border-radius: 12px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .login-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; color: var(--accent-primary); }
-        .login-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
+        /* OVERLAYS (Login & Password Change) */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 52, 64, 0.95); backdrop-filter: blur(10px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.3s ease; }
+        .modal-box { background: var(--bg-card); border: 1px solid var(--accent-primary); padding: 40px; width: 100%; max-width: 400px; border-radius: 12px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); position: relative; }
+        .modal-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; color: var(--accent-primary); }
+        .modal-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
+        .close-modal { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
 
-        /* APP LAYOUT */
+        /* LAYOUT */
         .app-container { display: grid; grid-template-columns: 320px 1fr; gap: 30px; width: 100%; max-width: 1100px; height: 85vh; opacity: 0; transition: opacity 0.5s ease; }
         @media (max-width: 900px) {
             .app-container { grid-template-columns: 1fr; height: 100%; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 20px; }
@@ -31,26 +32,42 @@
         .dev-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .sidebar { display: flex; flex-direction: column; flex-shrink: 0; }
         
-        /* USER SECTION & LOGOUT */
+        /* USER & MENU */
         .user-section { margin-bottom: 35px; }
-        .greeting-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 1.2rem; }
+        .greeting-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 1.2rem; position: relative; }
         .user-name { font-weight: 700; color: white; border-bottom: 1px dashed transparent; }
         
-        /* Logout Button Style */
-        .logout-btn {
-            background: rgba(191, 97, 106, 0.1); 
-            color: var(--accent-danger);
-            border: 1px solid transparent;
-            border-radius: 6px;
-            padding: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex; align-items: center; justify-content: center;
+        /* MENU BUTTON & DROPDOWN */
+        .menu-btn {
+            background: transparent; border: none; color: var(--text-muted);
+            font-size: 1.5rem; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s;
         }
-        .logout-btn:hover { background: var(--accent-danger); color: white; transform: scale(1.05); }
+        .menu-btn:hover, .menu-btn.active { color: var(--accent-primary); background: rgba(255,255,255,0.05); }
+
+        .dropdown-menu {
+            position: absolute; top: 100%; right: 0;
+            background: var(--bg-input); border: 1px solid var(--border-color);
+            border-radius: 8px; width: 200px;
+            display: none; flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 100;
+            overflow: hidden;
+            animation: slideDown 0.2s ease;
+        }
+        .dropdown-menu.show { display: flex; }
+
+        .menu-item {
+            padding: 12px 15px; text-align: left; background: transparent; border: none;
+            color: var(--text-main); font-size: 0.9rem; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; transition: 0.2s;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .menu-item:last-child { border-bottom: none; color: var(--accent-danger); }
+        .menu-item:last-child:hover { background: rgba(191, 97, 106, 0.1); }
 
         .welcome-sub { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
         
+        /* REST OF UI */
         .toggle-group { display: flex; gap: 10px; margin-bottom: 25px; }
         .type-btn { flex: 1; padding: 10px; background: transparent; border: 2px solid var(--border-color); color: var(--text-muted); border-radius: var(--border-radius); cursor: pointer; font-weight: 500; transition: 0.2s; }
         .type-btn.active { border-color: var(--accent-primary); color: var(--accent-primary); background: rgba(136, 192, 208, 0.1); }
@@ -86,14 +103,15 @@
         .date-sep { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent-primary); margin: 15px 0 8px; opacity: 0.8; flex-shrink: 0; }
         .dev-footer { text-align: center; font-size: 0.75rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: auto; opacity: 0.6; letter-spacing: 0.5px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div id="loginOverlay" class="login-overlay">
-        <div class="login-box">
-            <div class="login-title">Secure Access</div>
-            <div class="login-sub">Enter your codename & password</div>
+    <div id="loginOverlay" class="overlay">
+        <div class="modal-box">
+            <div class="modal-title">Secure Access</div>
+            <div class="modal-sub">Enter your codename & password</div>
             <div class="input-group">
                 <input type="text" id="loginNameInput" placeholder="> Codename" autocomplete="off">
             </div>
@@ -101,9 +119,22 @@
                 <input type="password" id="loginPassInput" placeholder="> Password" autocomplete="off">
             </div>
             <button class="add-btn" id="loginBtn">Login / Register</button>
-            <div style="font-size:0.7rem; color:#94a3b8; margin-top:10px;">
-                (New user? Enter a password to register instantly)
+            <div style="font-size:0.7rem; color:#94a3b8; margin-top:10px;">(New user? Enter a password to register)</div>
+        </div>
+    </div>
+
+    <div id="passOverlay" class="overlay" style="display:none;">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closePassModal()"><i class="ph-bold ph-x"></i></button>
+            <div class="modal-title">Change Password</div>
+            <div class="modal-sub">Update credentials for security</div>
+            <div class="input-group">
+                <input type="password" id="oldPassInput" placeholder="> Current Password" autocomplete="off">
             </div>
+            <div class="input-group">
+                <input type="password" id="newPassInput" placeholder="> New Password" autocomplete="off">
+            </div>
+            <button class="add-btn" id="changePassBtn">Update Password</button>
         </div>
     </div>
 
@@ -115,12 +146,25 @@
                         <span>Hello,</span>
                         <span id="userName" class="user-name">Dev</span>
                     </div>
-                    <button id="logoutBtn" class="logout-btn" title="Sign Out">
-                        <i class="ph-bold ph-power"></i>
-                    </button>
+                    
+                    <div style="position:relative;">
+                        <button id="menuTrigger" class="menu-btn"><i class="ph-bold ph-list"></i></button>
+                        <div id="menuDropdown" class="dropdown-menu">
+                            <button class="menu-item" onclick="openPassModal()">
+                                <i class="ph-bold ph-lock-key"></i> Change Pass
+                            </button>
+                            <button class="menu-item" onclick="shareApp()">
+                                <i class="ph-bold ph-share-network"></i> Share App
+                            </button>
+                            <button class="menu-item" onclick="logout()">
+                                <i class="ph-bold ph-sign-out"></i> Logout
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="welcome-sub">welcome back.</div>
             </div>
+
             <div class="toggle-group">
                 <button class="type-btn active" id="btnQuick">Quick</button>
                 <button class="type-btn" id="btnSched">Scheduled</button>
@@ -174,6 +218,7 @@
         import { getDatabase, ref, push, onValue, remove, update, get, set, child } 
         from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyDJiG6SkXmj_ofDuYiIRf8D5H6kyNvuhho",
             authDomain: "to-do-promise.firebaseapp.com",
@@ -188,14 +233,64 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
-        // Variables
         let tasksRef;
         let tasks = [];
         let mode = 'quick';
         let currentUser = '';
         const STORAGE_KEY_USER = 'devTask_user_secure';
 
-        // --- 1. SETUP FIREBASE FOR SPECIFIC USER ---
+        // --- MENU LOGIC ---
+        const menuBtn = document.getElementById('menuTrigger');
+        const dropdown = document.getElementById('menuDropdown');
+
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+            menuBtn.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('show');
+                menuBtn.classList.remove('active');
+            }
+        });
+
+        // --- SHARED FUNCTIONS (Window Scope) ---
+        window.openPassModal = () => {
+            document.getElementById('passOverlay').style.display = 'flex';
+            dropdown.classList.remove('show'); // Close menu
+        }
+
+        window.closePassModal = () => {
+            document.getElementById('passOverlay').style.display = 'none';
+            document.getElementById('oldPassInput').value = '';
+            document.getElementById('newPassInput').value = '';
+        }
+
+        window.shareApp = () => {
+            const url = window.location.href;
+            const text = "Check out my Task Manager developed by Promis Vora!";
+            
+            if (navigator.share) {
+                navigator.share({ title: 'DevTask', text: text, url: url })
+                .catch(console.error);
+            } else {
+                navigator.clipboard.writeText(url);
+                alert("Link copied to clipboard!");
+            }
+            dropdown.classList.remove('show');
+        }
+
+        window.logout = () => {
+            if(confirm("Sign out now?")) {
+                localStorage.removeItem(STORAGE_KEY_USER);
+                location.reload();
+            }
+        }
+
+        // --- FIREBASE INIT ---
         function initFirebaseForUser(userName) {
             currentUser = userName;
             tasksRef = ref(db, 'tasks/' + userName);
@@ -204,46 +299,34 @@
                 tasks = [];
                 const data = snapshot.val();
                 if(data) {
-                    Object.keys(data).forEach(key => {
-                        tasks.push({ id: key, ...data[key] });
-                    });
+                    Object.keys(data).forEach(key => tasks.push({ id: key, ...data[key] }));
                 }
                 render();
             });
         }
 
-        // --- 2. LOGOUT FUNCTION ---
-        function logout() {
-            if(confirm("Are you sure you want to sign out?")) {
-                localStorage.removeItem(STORAGE_KEY_USER); // Clear storage
-                location.reload(); // Refresh page to show login screen
-            }
-        }
-
-        // --- 3. LOGIN LOGIC ---
+        // --- AUTH LOGIC ---
         async function submitLogin() {
             const rawName = document.getElementById('loginNameInput').value.trim();
             const password = document.getElementById('loginPassInput').value.trim();
             const name = rawName.replace(/[^a-zA-Z0-9]/g, ""); 
 
-            if(!name || !password) return alert("Username and Password are required!");
+            if(!name || !password) return alert("Credentials required!");
 
             const loginBtn = document.getElementById('loginBtn');
-            loginBtn.innerText = "Checking...";
-            const dbRef = ref(db);
+            loginBtn.innerText = "Verifying...";
             
             try {
-                const snapshot = await get(child(dbRef, `credentials/${name}`));
-                
+                const snapshot = await get(child(ref(db), `credentials/${name}`));
                 if (snapshot.exists()) {
                     if (snapshot.val() === password) {
                         loginSuccess(name);
                     } else {
-                        alert("❌ INCORRECT PASSWORD!");
+                        alert("❌ INCORRECT PASSWORD");
                         loginBtn.innerText = "Login / Register";
                     }
                 } else {
-                    if(confirm(`Create new account '${name}' with this password?`)) {
+                    if(confirm(`Create new account '${name}'?`)) {
                         await set(ref(db, 'credentials/' + name), password);
                         alert("✅ Account Created!");
                         loginSuccess(name);
@@ -253,7 +336,7 @@
                 }
             } catch (error) {
                 console.error(error);
-                alert("Connection Error.");
+                alert("Network Error");
                 loginBtn.innerText = "Login / Register";
             }
         }
@@ -261,14 +344,33 @@
         function loginSuccess(name) {
             localStorage.setItem(STORAGE_KEY_USER, name);
             document.getElementById('userName').innerText = name;
-            const overlay = document.getElementById('loginOverlay');
-            overlay.style.opacity = '0';
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                document.getElementById('appContainer').style.opacity = '1';
-            }, 300);
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('appContainer').style.opacity = '1';
             initFirebaseForUser(name);
         }
+
+        // --- PASSWORD CHANGE LOGIC ---
+        document.getElementById('changePassBtn').addEventListener('click', async () => {
+            const oldPass = document.getElementById('oldPassInput').value.trim();
+            const newPass = document.getElementById('newPassInput').value.trim();
+
+            if(!oldPass || !newPass) return alert("Fill all fields!");
+
+            try {
+                // Verify old password first
+                const snapshot = await get(child(ref(db), `credentials/${currentUser}`));
+                if(snapshot.val() === oldPass) {
+                    // Update to new password
+                    await set(ref(db, `credentials/${currentUser}`), newPass);
+                    alert("✅ Password Updated Successfully!");
+                    window.closePassModal();
+                } else {
+                    alert("❌ Old Password is Wrong!");
+                }
+            } catch(e) {
+                alert("Error updating password.");
+            }
+        });
 
         function checkAutoLogin() {
             const savedUser = localStorage.getItem(STORAGE_KEY_USER);
@@ -282,16 +384,13 @@
             }
         }
 
-        // --- 4. TASK OPERATIONS ---
+        // --- TASK LOGIC ---
         function addTask() {
             if(!currentUser) return;
             const text = document.getElementById('taskInput').value.trim();
             if(!text) return;
             
-            const newTask = {
-                text: text, type: mode, completed: false, timestamp: Date.now()
-            };
-
+            const newTask = { text: text, type: mode, completed: false, timestamp: Date.now() };
             if(mode === 'scheduled') {
                 const date = document.getElementById('dateInput').value;
                 if(!date) return alert("Date required");
@@ -305,12 +404,10 @@
         window.toggleTask = (id, currentStatus) => update(ref(db, `tasks/${currentUser}/${id}`), { completed: !currentStatus });
         window.removeTask = (id) => remove(ref(db, `tasks/${currentUser}/${id}`));
         window.clearGroup = (type) => {
-            if(confirm(`Delete all ${type} tasks?`)) {
-                tasks.filter(t => t.type === type).forEach(t => remove(ref(db, `tasks/${currentUser}/${t.id}`)));
-            }
+            if(confirm(`Delete all ${type} tasks?`)) tasks.filter(t => t.type === type).forEach(t => remove(ref(db, `tasks/${currentUser}/${t.id}`)));
         }
 
-        // --- 5. RENDER ---
+        // --- RENDER ---
         function toggleMode(newMode) {
             mode = newMode;
             document.getElementById('btnQuick').classList.toggle('active', mode === 'quick');
@@ -347,9 +444,7 @@
         function createHTML(t) {
             return `
                 <div class="task-item ${t.completed ? 'completed' : ''}">
-                    <div class="check-box" onclick="toggleTask('${t.id}', ${t.completed})">
-                        ${t.completed ? '<i class="ph-bold ph-check"></i>' : ''}
-                    </div>
+                    <div class="check-box" onclick="toggleTask('${t.id}', ${t.completed})">${t.completed ? '<i class="ph-bold ph-check"></i>' : ''}</div>
                     <div class="task-content">
                         <div class="task-text">${t.text}</div>
                         ${t.type === 'scheduled' ? `<div class="task-meta"><span class="meta-${t.priority}">[${t.priority}]</span></div>` : ''}
@@ -359,21 +454,15 @@
             `;
         }
 
-        // --- 6. EVENT LISTENERS ---
+        // --- EVENTS ---
         document.getElementById('btnQuick').addEventListener('click', () => toggleMode('quick'));
         document.getElementById('btnSched').addEventListener('click', () => toggleMode('scheduled'));
         document.getElementById('commitBtn').addEventListener('click', addTask);
         document.getElementById('taskInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') addTask(); });
         document.getElementById('clearQuick').addEventListener('click', () => clearGroup('quick'));
         document.getElementById('clearSched').addEventListener('click', () => clearGroup('scheduled'));
-        document.getElementById('logoutBtn').addEventListener('click', logout); // NEW LOGOUT LISTENER
-
-        const loginBtn = document.getElementById('loginBtn');
-        const loginInput = document.getElementById('loginNameInput');
-        const passInput = document.getElementById('loginPassInput');
-        
-        loginBtn.addEventListener('click', submitLogin);
-        passInput.addEventListener('keypress', (e) => { if(e.key==='Enter') submitLogin() });
+        document.getElementById('loginBtn').addEventListener('click', submitLogin);
+        document.getElementById('loginPassInput').addEventListener('keypress', (e) => { if(e.key==='Enter') submitLogin() });
 
         document.getElementById('dateInput').valueAsDate = new Date();
         checkAutoLogin();
