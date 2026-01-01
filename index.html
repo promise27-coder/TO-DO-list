@@ -3,25 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TO-DO List</title>
+    <title>DevTask - Pro UI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
         /* --- THEME: NORD --- */
-        :root { --bg-body: #2e3440; --bg-card: #3b4252; --bg-input: #434c5e; --text-main: #d8dee9; --text-muted: #94a3b8; --accent-primary: #88c0d0; --accent-secondary: #ebcb8b; --accent-danger: #bf616a; --accent-success: #a3be8c; --border-radius: 8px; --border-color: #4c566a; }
+        :root { --bg-body: #2e3440; --bg-card: #3b4252; --bg-input: #434c5e; --text-main: #d8dee9; --text-muted: #94a3b8; --accent-primary: #88c0d0; --accent-secondary: #ebcb8b; --accent-danger: #bf616a; --accent-success: #a3be8c; --accent-purple: #b48ead; --border-radius: 8px; --border-color: #4c566a; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; display: flex; justify-content: center; align-items: center; padding: 2rem; overflow: hidden; }
         
-        /* OVERLAYS (Login, Password, Alerts) */
+        /* OVERLAYS */
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 52, 64, 0.95); backdrop-filter: blur(8px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.2s ease; }
         .modal-box { background: var(--bg-card); border: 1px solid var(--border-color); padding: 30px; width: 100%; max-width: 380px; border-radius: 12px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.4); position: relative; animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        
         .modal-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; color: var(--accent-primary); }
         .modal-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; line-height: 1.4; }
         .close-modal { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
         
-        /* Custom Alert/Confirm Specifics */
         .btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
         .modal-btn { padding: 10px 20px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; flex: 1; }
         .btn-primary { background: var(--accent-primary); color: #2e3440; }
@@ -44,7 +42,18 @@
         .sidebar { display: flex; flex-direction: column; flex-shrink: 0; }
         .user-section { margin-bottom: 35px; }
         .greeting-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 1.2rem; position: relative; }
-        .user-name { font-weight: 700; color: white; border-bottom: 1px dashed transparent; }
+        
+        /* --- 1. NEW STYLISH GRADIENT NAME --- */
+        .user-name {
+            font-weight: 800;
+            font-size: 1.4rem;
+            /* Gradient: Frost Blue to Soft Purple */
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0px 2px 10px rgba(136, 192, 208, 0.2); /* Subtle Glow */
+        }
         
         .menu-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s; }
         .menu-btn:hover, .menu-btn.active { color: var(--accent-primary); background: rgba(255,255,255,0.05); }
@@ -55,8 +64,34 @@
         .menu-item:last-child { border-bottom: none; color: var(--accent-danger); }
         .menu-item:last-child:hover { background: rgba(191, 97, 106, 0.1); }
 
-        .welcome-sub { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
-        .toggle-group { display: flex; gap: 10px; margin-bottom: 25px; }
+        /* --- 2. TYPEWRITER EFFECT --- */
+        .welcome-sub {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden; /* Ensures content is not revealed until animation */
+            border-right: 3px solid var(--accent-secondary); /* The blinking cursor */
+            white-space: nowrap; /* Keeps content on one line */
+            margin: 0;
+            width: 0; /* Start width 0 */
+            animation: 
+                typing 2s steps(20, end) forwards,
+                blink-caret 0.75s step-end infinite;
+        }
+
+        /* Typewriter Animations */
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 145px; } /* Adjust based on text length */
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--accent-secondary) }
+        }
+
+        /* REST OF CSS */
+        .toggle-group { display: flex; gap: 10px; margin-bottom: 25px; margin-top: 10px; }
         .type-btn { flex: 1; padding: 10px; background: transparent; border: 2px solid var(--border-color); color: var(--text-muted); border-radius: var(--border-radius); cursor: pointer; font-weight: 500; transition: 0.2s; }
         .type-btn.active { border-color: var(--accent-primary); color: var(--accent-primary); background: rgba(136, 192, 208, 0.1); }
         .type-btn#btnQuick.active { border-color: var(--accent-secondary); color: var(--accent-secondary); background: rgba(235, 203, 139, 0.1); }
@@ -155,7 +190,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="welcome-sub">welcome back.</div>
+                <div class="welcome-sub" id="typewriterText">welcome back!</div>
             </div>
 
             <div class="toggle-group">
@@ -223,7 +258,7 @@
         let currentUser = '';
         const STORAGE_KEY_USER = 'devTask_user_secure';
 
-        // --- CUSTOM ALERT/CONFIRM LOGIC ---
+        // --- CUSTOM ALERT/CONFIRM ---
         window.customAlert = (msg, title = "Notification") => {
             document.getElementById('alertTitle').innerText = title;
             document.getElementById('alertMsg').innerText = msg;
@@ -237,14 +272,10 @@
             document.getElementById('confirmModal').style.display = 'flex';
             
             const yesBtn = document.getElementById('confirmYesBtn');
-            // Remove old listener to avoid multi-calls
             const newBtn = yesBtn.cloneNode(true);
             yesBtn.parentNode.replaceChild(newBtn, yesBtn);
             
-            newBtn.addEventListener('click', () => {
-                callback();
-                closeConfirm();
-            });
+            newBtn.addEventListener('click', () => { callback(); closeConfirm(); });
         }
         window.closeConfirm = () => document.getElementById('confirmModal').style.display = 'none';
 
@@ -257,7 +288,6 @@
             if (!menuBtn.contains(e.target) && !dropdown.contains(e.target)) { dropdown.classList.remove('show'); menuBtn.classList.remove('active'); }
         });
 
-        // --- SHARED FUNCTIONS ---
         window.openPassModal = () => { document.getElementById('passOverlay').style.display = 'flex'; dropdown.classList.remove('show'); }
         window.closePassModal = () => {
             document.getElementById('passOverlay').style.display = 'none';
@@ -284,6 +314,12 @@
                 if(data) Object.keys(data).forEach(key => tasks.push({ id: key, ...data[key] }));
                 render();
             });
+            
+            // RESTART TYPEWRITER ANIMATION ON LOGIN
+            const tw = document.getElementById('typewriterText');
+            tw.style.animation = 'none';
+            tw.offsetHeight; /* trigger reflow */
+            tw.style.animation = null; 
         }
 
         // --- AUTH LOGIC ---
@@ -320,7 +356,6 @@
             initFirebaseForUser(name);
         }
 
-        // --- PASSWORD CHANGE ---
         document.getElementById('changePassBtn').addEventListener('click', async () => {
             const oldPass = document.getElementById('oldPassInput').value.trim();
             const newPass = document.getElementById('newPassInput').value.trim();
