@@ -3,104 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevTask - Promis Vora</title>
+    <title>DevTask - Live Sync</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
-        /* --- THEME: NORD --- */
-        :root {
-            --bg-body: #2e3440;
-            --bg-card: #3b4252;
-            --bg-input: #434c5e;
-            --text-main: #d8dee9;
-            --text-muted: #94a3b8;
-            --accent-primary: #88c0d0;
-            --accent-secondary: #ebcb8b;
-            --accent-danger: #bf616a;
-            --accent-success: #a3be8c;
-            --border-radius: 8px;
-            --border-color: #4c566a;
-        }
-
+        /* --- THEME: NORD (Same UI) --- */
+        :root { --bg-body: #2e3440; --bg-card: #3b4252; --bg-input: #434c5e; --text-main: #d8dee9; --text-muted: #94a3b8; --accent-primary: #88c0d0; --accent-secondary: #ebcb8b; --accent-danger: #bf616a; --accent-success: #a3be8c; --border-radius: 8px; --border-color: #4c566a; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-            overflow: hidden; /* Prevent body scroll on Desktop */
-        }
-
-        /* --- LOGIN POPUP --- */
-        .login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(46, 52, 64, 0.95); backdrop-filter: blur(10px);
-            z-index: 9999; display: flex; justify-content: center; align-items: center;
-            padding: 20px; animation: fadeIn 0.3s ease;
-        }
-        .login-box {
-            background: var(--bg-card); border: 1px solid var(--accent-primary);
-            padding: 40px; width: 100%; max-width: 400px; border-radius: 12px;
-            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
+        body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; display: flex; justify-content: center; align-items: center; padding: 2rem; overflow: hidden; }
+        
+        /* LOGIN OVERLAY */
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 52, 64, 0.95); backdrop-filter: blur(10px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.3s ease; }
+        .login-box { background: var(--bg-card); border: 1px solid var(--accent-primary); padding: 40px; width: 100%; max-width: 400px; border-radius: 12px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         .login-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; color: var(--accent-primary); }
         .login-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 30px; }
 
-        /* --- APP LAYOUT --- */
-        .app-container {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 30px;
-            width: 100%;
-            max-width: 1100px;
-            height: 85vh;
-            opacity: 0; transition: opacity 0.5s ease;
-        }
-
-        /* --- MOBILE SPECIFIC FIXES --- */
+        /* LAYOUT & MOBILE FIX */
+        .app-container { display: grid; grid-template-columns: 320px 1fr; gap: 30px; width: 100%; max-width: 1100px; height: 85vh; opacity: 0; transition: opacity 0.5s ease; }
+        
         @media (max-width: 900px) {
-            .app-container {
-                grid-template-columns: 1fr;
-                height: 100%; /* Use full height */
-                display: flex;
-                flex-direction: column;
-                overflow-y: auto; /* Scroll page if needed */
-                padding-bottom: 20px;
-            }
-            body { 
-                height: auto; 
-                overflow: auto; /* Enable scroll on body for mobile */
-                padding: 10px;
-            }
-
-            /* FIX FOR MOBILE BOX HEIGHTS - SCROLL INSIDE */
-            .quick-box, .scheduled-box {
-                flex: none !important; /* Stop auto-growing */
-                height: 300px !important; /* Fixed Height */
-            }
-            
-            /* Footer Adjustment for mobile */
-            .dev-footer {
-                margin-top: 20px;
-                padding-bottom: 20px;
-            }
+            .app-container { grid-template-columns: 1fr; height: 100%; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 20px; }
+            body { height: auto; overflow: auto; padding: 10px; }
+            .quick-box, .scheduled-box { flex: none !important; height: 300px !important; }
+            .dev-footer { margin-top: 20px; padding-bottom: 20px; }
         }
 
-        .dev-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 24px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        /* --- SIDEBAR --- */
+        .dev-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .sidebar { display: flex; flex-direction: column; flex-shrink: 0; }
+        
+        /* USER & INPUTS */
         .user-section { margin-bottom: 35px; }
         .greeting-row { display: flex; align-items: baseline; gap: 6px; font-size: 1.2rem; flex-wrap: wrap; }
         .user-name { font-weight: 700; color: white; border-bottom: 1px dashed transparent; cursor: text; transition: 0.2s; min-width: 50px; }
@@ -108,37 +40,32 @@
         .edit-icon { font-size: 0.9rem; color: var(--text-muted); opacity: 0.2; cursor: pointer; transition: all 0.2s ease; }
         .user-section:hover .edit-icon { opacity: 0.8; }
         .welcome-sub { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
-
+        
         .toggle-group { display: flex; gap: 10px; margin-bottom: 25px; }
         .type-btn { flex: 1; padding: 10px; background: transparent; border: 2px solid var(--border-color); color: var(--text-muted); border-radius: var(--border-radius); cursor: pointer; font-weight: 500; transition: 0.2s; }
         .type-btn.active { border-color: var(--accent-primary); color: var(--accent-primary); background: rgba(136, 192, 208, 0.1); }
         .type-btn#btnQuick.active { border-color: var(--accent-secondary); color: var(--accent-secondary); background: rgba(235, 203, 139, 0.1); }
-
+        
         .input-group { margin-bottom: 15px; text-align: left; }
         label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-family: 'JetBrains Mono', monospace; }
         input, select { width: 100%; background: var(--bg-input); border: 1px solid transparent; color: white; padding: 12px; border-radius: 6px; outline: none; transition: 0.2s; }
         input:focus, select:focus { border-color: var(--accent-primary); background: #4c566a; }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
         .add-btn { margin-top: 10px; width: 100%; padding: 14px; background: var(--accent-primary); color: #2e3440; font-weight: 700; border: none; border-radius: var(--border-radius); cursor: pointer; transition: 0.2s; }
-        
         #scheduledInputs { display: none; }
 
-        /* --- MAIN CONTENT & BOXES --- */
+        /* LISTS */
         .main-content { display: flex; flex-direction: column; gap: 20px; height: 100%; overflow: hidden; min-height: 0; }
-        
         .box-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 2px solid var(--bg-body); margin-bottom: 10px; flex-shrink: 0; }
         .box-title { font-weight: 600; display: flex; align-items: center; gap: 8px; }
         .clear-btn { background: transparent; border: none; color: var(--accent-danger); font-size: 0.8rem; cursor: pointer; opacity: 0.6; }
         .clear-btn:hover { opacity: 1; }
-        
-        /* SCROLLABLE LIST AREA */
         .task-list { overflow-y: auto; padding-right: 5px; flex-grow: 1; min-height: 0; }
         .task-list::-webkit-scrollbar { width: 5px; }
         .task-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
-
         .quick-box { display: flex; flex-direction: column; border-top: 3px solid var(--accent-secondary); height: 35%; min-height: 200px; }
         .scheduled-box { display: flex; flex-direction: column; border-top: 3px solid var(--accent-primary); flex-grow: 1; min-height: 0; }
-
+        
         .task-item { background: var(--bg-input); margin-bottom: 8px; padding: 12px 16px; border-radius: 6px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
         .task-item.completed { opacity: 0.5; text-decoration: line-through; }
         .check-box { width: 20px; height: 20px; border: 2px solid var(--text-muted); border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
@@ -148,18 +75,7 @@
         .delete-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 5px; }
         .delete-btn:hover { color: var(--accent-danger); }
         .date-sep { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent-primary); margin: 15px 0 8px; opacity: 0.8; flex-shrink: 0; }
-
-        /* --- FOOTER STYLE --- */
-        .dev-footer {
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
-            margin-top: auto; /* Push to bottom */
-            opacity: 0.6;
-            letter-spacing: 0.5px;
-        }
-
+        .dev-footer { text-align: center; font-size: 0.75rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: auto; opacity: 0.6; letter-spacing: 0.5px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
@@ -172,32 +88,28 @@
             <div class="input-group">
                 <input type="text" id="loginNameInput" placeholder="> Enter name here..." autocomplete="off">
             </div>
-            <button class="add-btn" onclick="submitLogin()">Access System</button>
+            <button class="add-btn" id="loginBtn">Access System</button>
         </div>
     </div>
 
     <div class="app-container" id="appContainer">
-        
         <aside class="dev-card sidebar">
             <div class="user-section">
                 <div class="greeting-row">
                     <span>Hello,</span>
                     <span id="userName" class="user-name" contenteditable="true" spellcheck="false">Dev</span>
-                    <i class="ph-fill ph-pencil-simple edit-icon" onclick="document.getElementById('userName').focus()"></i>
+                    <i class="ph-fill ph-pencil-simple edit-icon"></i>
                 </div>
                 <div class="welcome-sub">welcome back.</div>
             </div>
-
             <div class="toggle-group">
-                <button class="type-btn active" id="btnQuick" onclick="toggleMode('quick')">Quick</button>
-                <button class="type-btn" id="btnSched" onclick="toggleMode('scheduled')">Scheduled</button>
+                <button class="type-btn active" id="btnQuick">Quick</button>
+                <button class="type-btn" id="btnSched">Scheduled</button>
             </div>
-
             <div class="input-group">
                 <label>TASK DESCRIPTION</label>
                 <input type="text" id="taskInput" placeholder="> Type here..." autocomplete="off">
             </div>
-
             <div id="scheduledInputs">
                 <div class="input-group">
                     <label>TARGET DATE</label>
@@ -212,8 +124,7 @@
                     </select>
                 </div>
             </div>
-
-            <button class="add-btn" onclick="addTask()">COMMIT TASK</button>
+            <button class="add-btn" id="commitBtn">COMMIT TASK</button>
         </aside>
 
         <main class="main-content">
@@ -222,74 +133,53 @@
                     <div class="box-title" style="color: var(--accent-secondary)">
                         <i class="ph-fill ph-lightning"></i> Quick Notes
                     </div>
-                    <button class="clear-btn" onclick="clearAll('quick')">Clear All</button>
+                    <button class="clear-btn" id="clearQuick">Clear All</button>
                 </div>
                 <div id="quickList" class="task-list"></div>
             </div>
-
             <div class="dev-card scheduled-box">
                 <div class="box-header">
                     <div class="box-title" style="color: var(--accent-primary)">
                         <i class="ph-fill ph-calendar-check"></i> Scheduled Plan
                     </div>
-                    <button class="clear-btn" onclick="clearAll('scheduled')">Clear All</button>
+                    <button class="clear-btn" id="clearSched">Clear All</button>
                 </div>
                 <div id="scheduledList" class="task-list"></div>
             </div>
-
-            <div class="dev-footer">
-                &copy; Developed by Promis Vora
-            </div>
+            <div class="dev-footer">&copy; Developed by Promis Vora</div>
         </main>
     </div>
 
-    <script>
+    <script type="module">
+        // Import Firebase Functions from CDN (Compatible with HTML file)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue, remove, update } 
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // --- YOUR FIREBASE CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJiG6SkXmj_ofDuYiIRf8D5H6kyNvuhho",
+            authDomain: "to-do-promise.firebaseapp.com",
+            projectId: "to-do-promise",
+            storageBucket: "to-do-promise.firebasestorage.app",
+            messagingSenderId: "1033945661048",
+            appId: "1:1033945661048:web:859e70fe1788ccd989b78d",
+            measurementId: "G-EPWPC7CQNW",
+            // IMPORTANT: I added this manually based on your Project ID
+            databaseURL: "https://to-do-promise-default-rtdb.firebaseio.com"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const tasksRef = ref(db, 'tasks');
+
+        // State
         let tasks = [];
         let mode = 'quick';
-        const STORAGE_KEY_DATA = 'devTask_data_final';
         const STORAGE_KEY_USER = 'devTask_user_final';
 
-        function checkLogin() {
-            const savedUser = localStorage.getItem(STORAGE_KEY_USER);
-            const overlay = document.getElementById('loginOverlay');
-            const app = document.getElementById('appContainer');
-
-            if (savedUser) {
-                overlay.style.display = 'none';
-                app.style.opacity = '1';
-                document.getElementById('userName').innerText = savedUser;
-            } else {
-                document.getElementById('loginNameInput').focus();
-            }
-        }
-
-        function submitLogin() {
-            const name = document.getElementById('loginNameInput').value.trim();
-            if (name) {
-                localStorage.setItem(STORAGE_KEY_USER, name);
-                document.getElementById('userName').innerText = name;
-                const overlay = document.getElementById('loginOverlay');
-                overlay.style.opacity = '0';
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                    document.getElementById('appContainer').style.opacity = '1';
-                }, 300);
-            } else {
-                alert("Please identify yourself.");
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            checkLogin();
-            const saved = localStorage.getItem(STORAGE_KEY_DATA);
-            if(saved) tasks = JSON.parse(saved);
-            document.getElementById('dateInput').valueAsDate = new Date();
-            render();
-            document.getElementById('userName').addEventListener('input', (e) => localStorage.setItem(STORAGE_KEY_USER, e.target.innerText));
-            document.getElementById('taskInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') addTask(); });
-            document.getElementById('loginNameInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') submitLogin(); });
-        });
-
+        // --- Functions Logic ---
         function toggleMode(newMode) {
             mode = newMode;
             document.getElementById('btnQuick').classList.toggle('active', mode === 'quick');
@@ -298,26 +188,64 @@
             document.getElementById('taskInput').placeholder = mode === 'quick' ? "> Quick note..." : "> Scheduled task...";
         }
 
+        // Add to Firebase
         function addTask() {
             const text = document.getElementById('taskInput').value.trim();
             if(!text) return;
-            const task = { id: Date.now(), text, type: mode, completed: false };
+            
+            const newTask = {
+                text: text,
+                type: mode,
+                completed: false,
+                timestamp: Date.now()
+            };
+
             if(mode === 'scheduled') {
                 const date = document.getElementById('dateInput').value;
                 if(!date) return alert("Date required");
-                task.date = date;
-                task.priority = document.getElementById('priorityInput').value;
+                newTask.date = date;
+                newTask.priority = document.getElementById('priorityInput').value;
             }
-            tasks.push(task);
+
+            // Push to Cloud
+            push(tasksRef, newTask);
             document.getElementById('taskInput').value = '';
-            save();
         }
 
-        function toggle(id) { tasks = tasks.map(t => t.id === id ? {...t, completed: !t.completed} : t); save(); }
-        function remove(id) { tasks = tasks.filter(t => t.id !== id); save(); }
-        function clearAll(type) { tasks = tasks.filter(t => t.type !== type); save(); }
-        function save() { localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(tasks)); render(); }
+        // Live Listener (Sync)
+        onValue(tasksRef, (snapshot) => {
+            tasks = [];
+            const data = snapshot.val();
+            if(data) {
+                // Convert Object to Array
+                Object.keys(data).forEach(key => {
+                    tasks.push({ id: key, ...data[key] });
+                });
+            }
+            render();
+        });
 
+        // Toggle in Firebase
+        window.toggleTask = (id, currentStatus) => {
+            update(ref(db, `tasks/${id}`), { completed: !currentStatus });
+        }
+
+        // Remove from Firebase
+        window.removeTask = (id) => {
+            remove(ref(db, `tasks/${id}`));
+        }
+
+        // Clear Group
+        window.clearGroup = (type) => {
+            if(confirm(`Delete all ${type} tasks?`)) {
+                // Find all tasks of this type and remove them
+                tasks.filter(t => t.type === type).forEach(t => {
+                    remove(ref(db, `tasks/${t.id}`));
+                });
+            }
+        }
+
+        // --- RENDER (Same Logic) ---
         function render() {
             const qList = document.getElementById('quickList');
             const sList = document.getElementById('scheduledList');
@@ -346,15 +274,53 @@
         function createHTML(t) {
             return `
                 <div class="task-item ${t.completed ? 'completed' : ''}">
-                    <div class="check-box" onclick="toggle(${t.id})">${t.completed ? '<i class="ph-bold ph-check"></i>' : ''}</div>
+                    <div class="check-box" onclick="toggleTask('${t.id}', ${t.completed})">
+                        ${t.completed ? '<i class="ph-bold ph-check"></i>' : ''}
+                    </div>
                     <div class="task-content">
                         <div class="task-text">${t.text}</div>
                         ${t.type === 'scheduled' ? `<div class="task-meta"><span class="meta-${t.priority}">[${t.priority}]</span></div>` : ''}
                     </div>
-                    <button class="delete-btn" onclick="remove(${t.id})"><i class="ph-bold ph-trash"></i></button>
+                    <button class="delete-btn" onclick="removeTask('${t.id}')"><i class="ph-bold ph-trash"></i></button>
                 </div>
             `;
         }
+
+        // --- Event Listeners (Module Scope) ---
+        document.getElementById('btnQuick').addEventListener('click', () => toggleMode('quick'));
+        document.getElementById('btnSched').addEventListener('click', () => toggleMode('scheduled'));
+        document.getElementById('commitBtn').addEventListener('click', addTask);
+        document.getElementById('taskInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') addTask(); });
+        
+        document.getElementById('clearQuick').addEventListener('click', () => clearGroup('quick'));
+        document.getElementById('clearSched').addEventListener('click', () => clearGroup('scheduled'));
+
+        // Login Logic
+        const loginBtn = document.getElementById('loginBtn');
+        const loginInput = document.getElementById('loginNameInput');
+        
+        function submitLogin() {
+            const name = loginInput.value.trim();
+            if(name) {
+                localStorage.setItem(STORAGE_KEY_USER, name);
+                document.getElementById('userName').innerText = name;
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('appContainer').style.opacity = '1';
+            }
+        }
+        
+        loginBtn.addEventListener('click', submitLogin);
+        loginInput.addEventListener('keypress', (e) => { if(e.key==='Enter') submitLogin() });
+
+        // Init
+        const savedUser = localStorage.getItem(STORAGE_KEY_USER);
+        if(savedUser) {
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('appContainer').style.opacity = '1';
+            document.getElementById('userName').innerText = savedUser;
+        }
+        document.getElementById('dateInput').valueAsDate = new Date();
+
     </script>
 </body>
 </html>
