@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevTask - Secure Login</title>
+    <title>DevTask - Secure & Sync</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
@@ -19,7 +19,7 @@
         .login-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; color: var(--accent-primary); }
         .login-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
 
-        /* LAYOUT */
+        /* APP LAYOUT */
         .app-container { display: grid; grid-template-columns: 320px 1fr; gap: 30px; width: 100%; max-width: 1100px; height: 85vh; opacity: 0; transition: opacity 0.5s ease; }
         @media (max-width: 900px) {
             .app-container { grid-template-columns: 1fr; height: 100%; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 20px; }
@@ -30,12 +30,25 @@
 
         .dev-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .sidebar { display: flex; flex-direction: column; flex-shrink: 0; }
+        
+        /* USER SECTION & LOGOUT */
         .user-section { margin-bottom: 35px; }
-        .greeting-row { display: flex; align-items: baseline; gap: 6px; font-size: 1.2rem; flex-wrap: wrap; }
-        .user-name { font-weight: 700; color: white; border-bottom: 1px dashed transparent; cursor: text; transition: 0.2s; min-width: 50px; }
-        .user-name:focus { outline: none; border-bottom-color: var(--accent-primary); color: var(--accent-primary); }
-        .edit-icon { font-size: 0.9rem; color: var(--text-muted); opacity: 0.2; cursor: pointer; transition: all 0.2s ease; }
-        .user-section:hover .edit-icon { opacity: 0.8; }
+        .greeting-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 1.2rem; }
+        .user-name { font-weight: 700; color: white; border-bottom: 1px dashed transparent; }
+        
+        /* Logout Button Style */
+        .logout-btn {
+            background: rgba(191, 97, 106, 0.1); 
+            color: var(--accent-danger);
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logout-btn:hover { background: var(--accent-danger); color: white; transform: scale(1.05); }
+
         .welcome-sub { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
         
         .toggle-group { display: flex; gap: 10px; margin-bottom: 25px; }
@@ -81,15 +94,12 @@
         <div class="login-box">
             <div class="login-title">Secure Access</div>
             <div class="login-sub">Enter your codename & password</div>
-            
             <div class="input-group">
                 <input type="text" id="loginNameInput" placeholder="> Codename" autocomplete="off">
             </div>
-            
             <div class="input-group">
                 <input type="password" id="loginPassInput" placeholder="> Password" autocomplete="off">
             </div>
-
             <button class="add-btn" id="loginBtn">Login / Register</button>
             <div style="font-size:0.7rem; color:#94a3b8; margin-top:10px;">
                 (New user? Enter a password to register instantly)
@@ -101,8 +111,13 @@
         <aside class="dev-card sidebar">
             <div class="user-section">
                 <div class="greeting-row">
-                    <span>Hello,</span>
-                    <span id="userName" class="user-name" contenteditable="false">Dev</span>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span>Hello,</span>
+                        <span id="userName" class="user-name">Dev</span>
+                    </div>
+                    <button id="logoutBtn" class="logout-btn" title="Sign Out">
+                        <i class="ph-bold ph-power"></i>
+                    </button>
                 </div>
                 <div class="welcome-sub">welcome back.</div>
             </div>
@@ -178,7 +193,7 @@
         let tasks = [];
         let mode = 'quick';
         let currentUser = '';
-        const STORAGE_KEY_USER = 'devTask_user_secure'; // Changed key to force re-login for security
+        const STORAGE_KEY_USER = 'devTask_user_secure';
 
         // --- 1. SETUP FIREBASE FOR SPECIFIC USER ---
         function initFirebaseForUser(userName) {
@@ -197,41 +212,40 @@
             });
         }
 
-        // --- 2. SECURE LOGIN LOGIC ---
-        
+        // --- 2. LOGOUT FUNCTION ---
+        function logout() {
+            if(confirm("Are you sure you want to sign out?")) {
+                localStorage.removeItem(STORAGE_KEY_USER); // Clear storage
+                location.reload(); // Refresh page to show login screen
+            }
+        }
+
+        // --- 3. LOGIN LOGIC ---
         async function submitLogin() {
             const rawName = document.getElementById('loginNameInput').value.trim();
             const password = document.getElementById('loginPassInput').value.trim();
             const name = rawName.replace(/[^a-zA-Z0-9]/g, ""); 
 
-            if(!name || !password) {
-                return alert("Username and Password are required!");
-            }
+            if(!name || !password) return alert("Username and Password are required!");
 
             const loginBtn = document.getElementById('loginBtn');
             loginBtn.innerText = "Checking...";
-
-            // Check if user exists in 'credentials' node
             const dbRef = ref(db);
             
             try {
                 const snapshot = await get(child(dbRef, `credentials/${name}`));
                 
                 if (snapshot.exists()) {
-                    // USER EXISTS - CHECK PASSWORD
-                    const savedPass = snapshot.val();
-                    if (savedPass === password) {
-                        // Success Logic
+                    if (snapshot.val() === password) {
                         loginSuccess(name);
                     } else {
                         alert("❌ INCORRECT PASSWORD!");
                         loginBtn.innerText = "Login / Register";
                     }
                 } else {
-                    // USER DOES NOT EXIST - REGISTER NEW
-                    if(confirm(`User '${name}' not found. Create new account with this password?`)) {
+                    if(confirm(`Create new account '${name}' with this password?`)) {
                         await set(ref(db, 'credentials/' + name), password);
-                        alert("✅ Account Created Successfully!");
+                        alert("✅ Account Created!");
                         loginSuccess(name);
                     } else {
                         loginBtn.innerText = "Login / Register";
@@ -239,15 +253,13 @@
                 }
             } catch (error) {
                 console.error(error);
-                alert("Error connecting to server.");
+                alert("Connection Error.");
                 loginBtn.innerText = "Login / Register";
             }
         }
 
         function loginSuccess(name) {
-            // Save to local storage for auto-login next time
             localStorage.setItem(STORAGE_KEY_USER, name);
-            
             document.getElementById('userName').innerText = name;
             const overlay = document.getElementById('loginOverlay');
             overlay.style.opacity = '0';
@@ -255,7 +267,6 @@
                 overlay.style.display = 'none';
                 document.getElementById('appContainer').style.opacity = '1';
             }, 300);
-
             initFirebaseForUser(name);
         }
 
@@ -271,18 +282,14 @@
             }
         }
 
-        // --- 3. TASK OPERATIONS ---
+        // --- 4. TASK OPERATIONS ---
         function addTask() {
             if(!currentUser) return;
-
             const text = document.getElementById('taskInput').value.trim();
             if(!text) return;
             
             const newTask = {
-                text: text,
-                type: mode,
-                completed: false,
-                timestamp: Date.now()
+                text: text, type: mode, completed: false, timestamp: Date.now()
             };
 
             if(mode === 'scheduled') {
@@ -291,28 +298,19 @@
                 newTask.date = date;
                 newTask.priority = document.getElementById('priorityInput').value;
             }
-
             push(tasksRef, newTask);
             document.getElementById('taskInput').value = '';
         }
 
-        window.toggleTask = (id, currentStatus) => {
-            update(ref(db, `tasks/${currentUser}/${id}`), { completed: !currentStatus });
-        }
-
-        window.removeTask = (id) => {
-            remove(ref(db, `tasks/${currentUser}/${id}`));
-        }
-
+        window.toggleTask = (id, currentStatus) => update(ref(db, `tasks/${currentUser}/${id}`), { completed: !currentStatus });
+        window.removeTask = (id) => remove(ref(db, `tasks/${currentUser}/${id}`));
         window.clearGroup = (type) => {
             if(confirm(`Delete all ${type} tasks?`)) {
-                tasks.filter(t => t.type === type).forEach(t => {
-                    remove(ref(db, `tasks/${currentUser}/${t.id}`));
-                });
+                tasks.filter(t => t.type === type).forEach(t => remove(ref(db, `tasks/${currentUser}/${t.id}`)));
             }
         }
 
-        // --- 4. RENDER & UI ---
+        // --- 5. RENDER ---
         function toggleMode(newMode) {
             mode = newMode;
             document.getElementById('btnQuick').classList.toggle('active', mode === 'quick');
@@ -361,13 +359,14 @@
             `;
         }
 
-        // --- 5. EVENT LISTENERS ---
+        // --- 6. EVENT LISTENERS ---
         document.getElementById('btnQuick').addEventListener('click', () => toggleMode('quick'));
         document.getElementById('btnSched').addEventListener('click', () => toggleMode('scheduled'));
         document.getElementById('commitBtn').addEventListener('click', addTask);
         document.getElementById('taskInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') addTask(); });
         document.getElementById('clearQuick').addEventListener('click', () => clearGroup('quick'));
         document.getElementById('clearSched').addEventListener('click', () => clearGroup('scheduled'));
+        document.getElementById('logoutBtn').addEventListener('click', logout); // NEW LOGOUT LISTENER
 
         const loginBtn = document.getElementById('loginBtn');
         const loginInput = document.getElementById('loginNameInput');
@@ -377,8 +376,6 @@
         passInput.addEventListener('keypress', (e) => { if(e.key==='Enter') submitLogin() });
 
         document.getElementById('dateInput').valueAsDate = new Date();
-        
-        // Start Check
         checkAutoLogin();
 
     </script>
