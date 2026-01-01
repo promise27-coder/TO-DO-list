@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevTask - Advanced</title>
+    <title>DevTask - Pro UI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
@@ -13,12 +13,23 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; display: flex; justify-content: center; align-items: center; padding: 2rem; overflow: hidden; }
         
-        /* OVERLAYS (Login & Password Change) */
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 52, 64, 0.95); backdrop-filter: blur(10px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.3s ease; }
-        .modal-box { background: var(--bg-card); border: 1px solid var(--accent-primary); padding: 40px; width: 100%; max-width: 400px; border-radius: 12px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); position: relative; }
-        .modal-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; color: var(--accent-primary); }
-        .modal-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
+        /* OVERLAYS (Login, Password, Alerts) */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 52, 64, 0.95); backdrop-filter: blur(8px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.2s ease; }
+        .modal-box { background: var(--bg-card); border: 1px solid var(--border-color); padding: 30px; width: 100%; max-width: 380px; border-radius: 12px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.4); position: relative; animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        .modal-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; color: var(--accent-primary); }
+        .modal-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; line-height: 1.4; }
         .close-modal { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
+        
+        /* Custom Alert/Confirm Specifics */
+        .btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+        .modal-btn { padding: 10px 20px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; flex: 1; }
+        .btn-primary { background: var(--accent-primary); color: #2e3440; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-danger { background: var(--accent-danger); color: #fff; }
+        .btn-danger:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-secondary { background: var(--bg-input); color: var(--text-main); }
+        .btn-secondary:hover { background: #4c566a; }
 
         /* LAYOUT */
         .app-container { display: grid; grid-template-columns: 320px 1fr; gap: 30px; width: 100%; max-width: 1100px; height: 85vh; opacity: 0; transition: opacity 0.5s ease; }
@@ -31,43 +42,20 @@
 
         .dev-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .sidebar { display: flex; flex-direction: column; flex-shrink: 0; }
-        
-        /* USER & MENU */
         .user-section { margin-bottom: 35px; }
         .greeting-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 1.2rem; position: relative; }
         .user-name { font-weight: 700; color: white; border-bottom: 1px dashed transparent; }
         
-        /* MENU BUTTON & DROPDOWN */
-        .menu-btn {
-            background: transparent; border: none; color: var(--text-muted);
-            font-size: 1.5rem; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s;
-        }
+        .menu-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s; }
         .menu-btn:hover, .menu-btn.active { color: var(--accent-primary); background: rgba(255,255,255,0.05); }
-
-        .dropdown-menu {
-            position: absolute; top: 100%; right: 0;
-            background: var(--bg-input); border: 1px solid var(--border-color);
-            border-radius: 8px; width: 200px;
-            display: none; flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 100;
-            overflow: hidden;
-            animation: slideDown 0.2s ease;
-        }
+        .dropdown-menu { position: absolute; top: 100%; right: 0; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; width: 200px; display: none; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 100; overflow: hidden; animation: slideDown 0.2s ease; }
         .dropdown-menu.show { display: flex; }
-
-        .menu-item {
-            padding: 12px 15px; text-align: left; background: transparent; border: none;
-            color: var(--text-main); font-size: 0.9rem; cursor: pointer;
-            display: flex; align-items: center; gap: 10px; transition: 0.2s;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
+        .menu-item { padding: 12px 15px; text-align: left; background: transparent; border: none; color: var(--text-main); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .menu-item:hover { background: rgba(255,255,255,0.05); color: white; }
         .menu-item:last-child { border-bottom: none; color: var(--accent-danger); }
         .menu-item:last-child:hover { background: rgba(191, 97, 106, 0.1); }
 
         .welcome-sub { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
-        
-        /* REST OF UI */
         .toggle-group { display: flex; gap: 10px; margin-bottom: 25px; }
         .type-btn { flex: 1; padding: 10px; background: transparent; border: 2px solid var(--border-color); color: var(--text-muted); border-radius: var(--border-radius); cursor: pointer; font-weight: 500; transition: 0.2s; }
         .type-btn.active { border-color: var(--accent-primary); color: var(--accent-primary); background: rgba(136, 192, 208, 0.1); }
@@ -91,7 +79,6 @@
         .task-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
         .quick-box { display: flex; flex-direction: column; border-top: 3px solid var(--accent-secondary); height: 35%; min-height: 200px; }
         .scheduled-box { display: flex; flex-direction: column; border-top: 3px solid var(--accent-primary); flex-grow: 1; min-height: 0; }
-        
         .task-item { background: var(--bg-input); margin-bottom: 8px; padding: 12px 16px; border-radius: 6px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
         .task-item.completed { opacity: 0.5; text-decoration: line-through; }
         .check-box { width: 20px; height: 20px; border: 2px solid var(--text-muted); border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
@@ -102,22 +89,39 @@
         .delete-btn:hover { color: var(--accent-danger); }
         .date-sep { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent-primary); margin: 15px 0 8px; opacity: 0.8; flex-shrink: 0; }
         .dev-footer { text-align: center; font-size: 0.75rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: auto; opacity: 0.6; letter-spacing: 0.5px; }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
+    <div id="alertModal" class="overlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-title" id="alertTitle">Notification</div>
+            <div class="modal-sub" id="alertMsg">Message goes here</div>
+            <button class="modal-btn btn-primary" onclick="closeAlert()">Okay</button>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="overlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-title" id="confirmTitle">Confirm Action</div>
+            <div class="modal-sub" id="confirmMsg">Are you sure?</div>
+            <div class="btn-row">
+                <button class="modal-btn btn-secondary" onclick="closeConfirm()">Cancel</button>
+                <button class="modal-btn btn-danger" id="confirmYesBtn">Yes, Proceed</button>
+            </div>
+        </div>
+    </div>
+
     <div id="loginOverlay" class="overlay">
         <div class="modal-box">
             <div class="modal-title">Secure Access</div>
             <div class="modal-sub">Enter your codename & password</div>
-            <div class="input-group">
-                <input type="text" id="loginNameInput" placeholder="> Codename" autocomplete="off">
-            </div>
-            <div class="input-group">
-                <input type="password" id="loginPassInput" placeholder="> Password" autocomplete="off">
-            </div>
+            <div class="input-group"><input type="text" id="loginNameInput" placeholder="> Codename" autocomplete="off"></div>
+            <div class="input-group"><input type="password" id="loginPassInput" placeholder="> Password" autocomplete="off"></div>
             <button class="add-btn" id="loginBtn">Login / Register</button>
             <div style="font-size:0.7rem; color:#94a3b8; margin-top:10px;">(New user? Enter a password to register)</div>
         </div>
@@ -128,12 +132,8 @@
             <button class="close-modal" onclick="closePassModal()"><i class="ph-bold ph-x"></i></button>
             <div class="modal-title">Change Password</div>
             <div class="modal-sub">Update credentials for security</div>
-            <div class="input-group">
-                <input type="password" id="oldPassInput" placeholder="> Current Password" autocomplete="off">
-            </div>
-            <div class="input-group">
-                <input type="password" id="newPassInput" placeholder="> New Password" autocomplete="off">
-            </div>
+            <div class="input-group"><input type="password" id="oldPassInput" placeholder="> Current Password" autocomplete="off"></div>
+            <div class="input-group"><input type="password" id="newPassInput" placeholder="> New Password" autocomplete="off"></div>
             <button class="add-btn" id="changePassBtn">Update Password</button>
         </div>
     </div>
@@ -146,19 +146,12 @@
                         <span>Hello,</span>
                         <span id="userName" class="user-name">Dev</span>
                     </div>
-                    
                     <div style="position:relative;">
                         <button id="menuTrigger" class="menu-btn"><i class="ph-bold ph-list"></i></button>
                         <div id="menuDropdown" class="dropdown-menu">
-                            <button class="menu-item" onclick="openPassModal()">
-                                <i class="ph-bold ph-lock-key"></i> Change Pass
-                            </button>
-                            <button class="menu-item" onclick="shareApp()">
-                                <i class="ph-bold ph-share-network"></i> Share App
-                            </button>
-                            <button class="menu-item" onclick="logout()">
-                                <i class="ph-bold ph-sign-out"></i> Logout
-                            </button>
+                            <button class="menu-item" onclick="openPassModal()"><i class="ph-bold ph-lock-key"></i> Change Pass</button>
+                            <button class="menu-item" onclick="shareApp()"><i class="ph-bold ph-share-network"></i> Share App</button>
+                            <button class="menu-item" onclick="logout()"><i class="ph-bold ph-sign-out"></i> Logout</button>
                         </div>
                     </div>
                 </div>
@@ -174,12 +167,8 @@
                 <input type="text" id="taskInput" placeholder="> Type here..." autocomplete="off">
             </div>
             <div id="scheduledInputs">
-                <div class="input-group">
-                    <label>TARGET DATE</label>
-                    <input type="date" id="dateInput">
-                </div>
-                <div class="input-group">
-                    <label>PRIORITY</label>
+                <div class="input-group"><label>TARGET DATE</label><input type="date" id="dateInput"></div>
+                <div class="input-group"><label>PRIORITY</label>
                     <select id="priorityInput">
                         <option value="High">High (Urgent)</option>
                         <option value="Medium" selected>Medium</option>
@@ -193,18 +182,14 @@
         <main class="main-content">
             <div class="dev-card quick-box">
                 <div class="box-header">
-                    <div class="box-title" style="color: var(--accent-secondary)">
-                        <i class="ph-fill ph-lightning"></i> Quick Notes
-                    </div>
+                    <div class="box-title" style="color: var(--accent-secondary)"><i class="ph-fill ph-lightning"></i> Quick Notes</div>
                     <button class="clear-btn" id="clearQuick">Clear All</button>
                 </div>
                 <div id="quickList" class="task-list"></div>
             </div>
             <div class="dev-card scheduled-box">
                 <div class="box-header">
-                    <div class="box-title" style="color: var(--accent-primary)">
-                        <i class="ph-fill ph-calendar-check"></i> Scheduled Plan
-                    </div>
+                    <div class="box-title" style="color: var(--accent-primary)"><i class="ph-fill ph-calendar-check"></i> Scheduled Plan</div>
                     <button class="clear-btn" id="clearSched">Clear All</button>
                 </div>
                 <div id="scheduledList" class="task-list"></div>
@@ -218,7 +203,6 @@
         import { getDatabase, ref, push, onValue, remove, update, get, set, child } 
         from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyDJiG6SkXmj_ofDuYiIRf8D5H6kyNvuhho",
             authDomain: "to-do-promise.firebaseapp.com",
@@ -239,68 +223,65 @@
         let currentUser = '';
         const STORAGE_KEY_USER = 'devTask_user_secure';
 
+        // --- CUSTOM ALERT/CONFIRM LOGIC ---
+        window.customAlert = (msg, title = "Notification") => {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMsg').innerText = msg;
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+        window.closeAlert = () => document.getElementById('alertModal').style.display = 'none';
+
+        window.customConfirm = (msg, callback, title = "Confirm Action") => {
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmMsg').innerText = msg;
+            document.getElementById('confirmModal').style.display = 'flex';
+            
+            const yesBtn = document.getElementById('confirmYesBtn');
+            // Remove old listener to avoid multi-calls
+            const newBtn = yesBtn.cloneNode(true);
+            yesBtn.parentNode.replaceChild(newBtn, yesBtn);
+            
+            newBtn.addEventListener('click', () => {
+                callback();
+                closeConfirm();
+            });
+        }
+        window.closeConfirm = () => document.getElementById('confirmModal').style.display = 'none';
+
+
         // --- MENU LOGIC ---
         const menuBtn = document.getElementById('menuTrigger');
         const dropdown = document.getElementById('menuDropdown');
-
-        menuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('show');
-            menuBtn.classList.toggle('active');
-        });
-
-        // Close menu when clicking outside
+        menuBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.classList.toggle('show'); menuBtn.classList.toggle('active'); });
         document.addEventListener('click', (e) => {
-            if (!menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.remove('show');
-                menuBtn.classList.remove('active');
-            }
+            if (!menuBtn.contains(e.target) && !dropdown.contains(e.target)) { dropdown.classList.remove('show'); menuBtn.classList.remove('active'); }
         });
 
-        // --- SHARED FUNCTIONS (Window Scope) ---
-        window.openPassModal = () => {
-            document.getElementById('passOverlay').style.display = 'flex';
-            dropdown.classList.remove('show'); // Close menu
-        }
-
+        // --- SHARED FUNCTIONS ---
+        window.openPassModal = () => { document.getElementById('passOverlay').style.display = 'flex'; dropdown.classList.remove('show'); }
         window.closePassModal = () => {
             document.getElementById('passOverlay').style.display = 'none';
-            document.getElementById('oldPassInput').value = '';
-            document.getElementById('newPassInput').value = '';
+            document.getElementById('oldPassInput').value = ''; document.getElementById('newPassInput').value = '';
         }
-
         window.shareApp = () => {
             const url = window.location.href;
-            const text = "Check out my Task Manager developed by Promis Vora!";
-            
-            if (navigator.share) {
-                navigator.share({ title: 'DevTask', text: text, url: url })
-                .catch(console.error);
-            } else {
-                navigator.clipboard.writeText(url);
-                alert("Link copied to clipboard!");
-            }
+            if (navigator.share) navigator.share({ title: 'DevTask', text: "Check out my Task Manager!", url: url }).catch(console.error);
+            else { navigator.clipboard.writeText(url); customAlert("Link copied to clipboard!"); }
             dropdown.classList.remove('show');
         }
-
         window.logout = () => {
-            if(confirm("Sign out now?")) {
-                localStorage.removeItem(STORAGE_KEY_USER);
-                location.reload();
-            }
+            customConfirm("Are you sure you want to sign out?", () => {
+                localStorage.removeItem(STORAGE_KEY_USER); location.reload();
+            }, "Sign Out");
         }
 
         // --- FIREBASE INIT ---
         function initFirebaseForUser(userName) {
             currentUser = userName;
             tasksRef = ref(db, 'tasks/' + userName);
-
             onValue(tasksRef, (snapshot) => {
-                tasks = [];
-                const data = snapshot.val();
-                if(data) {
-                    Object.keys(data).forEach(key => tasks.push({ id: key, ...data[key] }));
-                }
+                tasks = []; const data = snapshot.val();
+                if(data) Object.keys(data).forEach(key => tasks.push({ id: key, ...data[key] }));
                 render();
             });
         }
@@ -310,8 +291,7 @@
             const rawName = document.getElementById('loginNameInput').value.trim();
             const password = document.getElementById('loginPassInput').value.trim();
             const name = rawName.replace(/[^a-zA-Z0-9]/g, ""); 
-
-            if(!name || !password) return alert("Credentials required!");
+            if(!name || !password) return customAlert("Username and Password are required!", "Error");
 
             const loginBtn = document.getElementById('loginBtn');
             loginBtn.innerText = "Verifying...";
@@ -319,26 +299,17 @@
             try {
                 const snapshot = await get(child(ref(db), `credentials/${name}`));
                 if (snapshot.exists()) {
-                    if (snapshot.val() === password) {
-                        loginSuccess(name);
-                    } else {
-                        alert("❌ INCORRECT PASSWORD");
-                        loginBtn.innerText = "Login / Register";
-                    }
+                    if (snapshot.val() === password) loginSuccess(name);
+                    else { customAlert("❌ Incorrect Password", "Access Denied"); loginBtn.innerText = "Login / Register"; }
                 } else {
-                    if(confirm(`Create new account '${name}'?`)) {
+                    customConfirm(`User '${name}' not found. Create new account?`, async () => {
                         await set(ref(db, 'credentials/' + name), password);
-                        alert("✅ Account Created!");
+                        customAlert("✅ Account Created!", "Success");
                         loginSuccess(name);
-                    } else {
-                        loginBtn.innerText = "Login / Register";
-                    }
+                    }, "Create Account");
+                    loginBtn.innerText = "Login / Register";
                 }
-            } catch (error) {
-                console.error(error);
-                alert("Network Error");
-                loginBtn.innerText = "Login / Register";
-            }
+            } catch (error) { console.error(error); customAlert("Network Error", "Error"); loginBtn.innerText = "Login / Register"; }
         }
 
         function loginSuccess(name) {
@@ -349,27 +320,18 @@
             initFirebaseForUser(name);
         }
 
-        // --- PASSWORD CHANGE LOGIC ---
+        // --- PASSWORD CHANGE ---
         document.getElementById('changePassBtn').addEventListener('click', async () => {
             const oldPass = document.getElementById('oldPassInput').value.trim();
             const newPass = document.getElementById('newPassInput').value.trim();
-
-            if(!oldPass || !newPass) return alert("Fill all fields!");
-
+            if(!oldPass || !newPass) return customAlert("Fill all fields!", "Error");
             try {
-                // Verify old password first
                 const snapshot = await get(child(ref(db), `credentials/${currentUser}`));
                 if(snapshot.val() === oldPass) {
-                    // Update to new password
                     await set(ref(db, `credentials/${currentUser}`), newPass);
-                    alert("✅ Password Updated Successfully!");
-                    window.closePassModal();
-                } else {
-                    alert("❌ Old Password is Wrong!");
-                }
-            } catch(e) {
-                alert("Error updating password.");
-            }
+                    customAlert("✅ Password Updated Successfully!", "Success"); window.closePassModal();
+                } else customAlert("❌ Old Password is Wrong!", "Error");
+            } catch(e) { customAlert("Error updating password.", "Error"); }
         });
 
         function checkAutoLogin() {
@@ -379,9 +341,7 @@
                 document.getElementById('appContainer').style.opacity = '1';
                 document.getElementById('userName').innerText = savedUser;
                 initFirebaseForUser(savedUser);
-            } else {
-                document.getElementById('loginNameInput').focus();
-            }
+            } else document.getElementById('loginNameInput').focus();
         }
 
         // --- TASK LOGIC ---
@@ -389,22 +349,21 @@
             if(!currentUser) return;
             const text = document.getElementById('taskInput').value.trim();
             if(!text) return;
-            
             const newTask = { text: text, type: mode, completed: false, timestamp: Date.now() };
             if(mode === 'scheduled') {
                 const date = document.getElementById('dateInput').value;
-                if(!date) return alert("Date required");
-                newTask.date = date;
-                newTask.priority = document.getElementById('priorityInput').value;
+                if(!date) return customAlert("Date required for scheduled task", "Missing Info");
+                newTask.date = date; newTask.priority = document.getElementById('priorityInput').value;
             }
-            push(tasksRef, newTask);
-            document.getElementById('taskInput').value = '';
+            push(tasksRef, newTask); document.getElementById('taskInput').value = '';
         }
 
         window.toggleTask = (id, currentStatus) => update(ref(db, `tasks/${currentUser}/${id}`), { completed: !currentStatus });
         window.removeTask = (id) => remove(ref(db, `tasks/${currentUser}/${id}`));
         window.clearGroup = (type) => {
-            if(confirm(`Delete all ${type} tasks?`)) tasks.filter(t => t.type === type).forEach(t => remove(ref(db, `tasks/${currentUser}/${t.id}`)));
+            customConfirm(`Delete all ${type} tasks? This cannot be undone.`, () => {
+                tasks.filter(t => t.type === type).forEach(t => remove(ref(db, `tasks/${currentUser}/${t.id}`)));
+            }, "Clear List");
         }
 
         // --- RENDER ---
@@ -417,25 +376,20 @@
         }
 
         function render() {
-            const qList = document.getElementById('quickList');
-            const sList = document.getElementById('scheduledList');
+            const qList = document.getElementById('quickList'); const sList = document.getElementById('scheduledList');
             qList.innerHTML = ''; sList.innerHTML = '';
-            
-            const quicks = tasks.filter(t => t.type === 'quick');
-            const scheds = tasks.filter(t => t.type === 'scheduled');
+            const quicks = tasks.filter(t => t.type === 'quick'); const scheds = tasks.filter(t => t.type === 'scheduled');
 
             if(!quicks.length) qList.innerHTML = `<div style="color:#4c566a; text-align:center; padding:10px;">// No quick notes</div>`;
             quicks.forEach(t => qList.innerHTML += createHTML(t));
 
             if(!scheds.length) sList.innerHTML = `<div style="color:#4c566a; text-align:center; padding:10px;">// No scheduled tasks</div>`;
             scheds.sort((a,b) => new Date(a.date) - new Date(b.date) || (a.priority===b.priority?0:a.priority==='High'?-1:1));
-            
             let lastDate = '';
             scheds.forEach(t => {
                 if(t.date !== lastDate) {
                     const d = new Date(t.date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
-                    sList.innerHTML += `<div class="date-sep"># ${d}</div>`;
-                    lastDate = t.date;
+                    sList.innerHTML += `<div class="date-sep"># ${d}</div>`; lastDate = t.date;
                 }
                 sList.innerHTML += createHTML(t);
             });
@@ -450,8 +404,7 @@
                         ${t.type === 'scheduled' ? `<div class="task-meta"><span class="meta-${t.priority}">[${t.priority}]</span></div>` : ''}
                     </div>
                     <button class="delete-btn" onclick="removeTask('${t.id}')"><i class="ph-bold ph-trash"></i></button>
-                </div>
-            `;
+                </div>`;
         }
 
         // --- EVENTS ---
@@ -466,7 +419,6 @@
 
         document.getElementById('dateInput').valueAsDate = new Date();
         checkAutoLogin();
-
     </script>
 </body>
 </html>
